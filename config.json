@@ -15,10 +15,8 @@
         "fav_urls": [],
         "dead_urls": [],
         "relisted_urls": [
-            [
-            ],
-            [
-            ]
+            [],
+            []
         ],
         "vins": {},
         "notes": {}
