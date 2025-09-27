@@ -1,0 +1,87 @@
+name: generate report
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "00 13 * * *"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+    steps:
+      - name: install nodejs lts
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - name: checkout repo
+        uses: actions/checkout@v4
+      - name: install dependencies
+        run: |
+          npm install
+      - name: otomoto listing
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          node otomoto.js
+      - name: otomoto create html
+        run: |
+          node json_to_html.js
+      - name: find relisted auctions
+        run: |
+          node duplicates.js
+      - name: generate report
+        run: |
+          node report.js    
+      - name: commit listing and report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Automatic listing and report generated
+          file_pattern: '.'
+  create-github-pages:
+    needs: generate
+    runs-on: ubuntu-latest
+    name: create github pages
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: 'master'
+      - name: create page dir
+        run: |
+            mkdir github-pages
+      - name: copy listings
+        run: |
+          cp -r listing github-pages
+      - name: copy images
+        run: |
+          cp -r images github-pages
+      - name: copy reports
+        run: |
+          mkdir github-pages/report
+          cp report/*.html github-pages/report
+      - name: copy index.html and stylesheet
+        run: |
+          cp index.html github-pages/
+          cp report.css github-pages/
+      - name: upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'github-pages'
+  deploy:
+    needs: create-github-pages
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
