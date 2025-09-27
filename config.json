@@ -1,0 +1,26 @@
+{
+    "listing": {
+        "dir": "listing",
+        "urls": [
+            {
+                "url": "https://www.otomoto.pl/osobowe/volkswagen/passat/seg-combi/od-2019/warszawa?search%5Bfilter_enum_cruisecontrol_type%5D%5B0%5D=adaptive-cruise-control&search%5Bfilter_enum_cruisecontrol_type%5D%5B1%5D=adaptive-cruise-control-predictive&search%5Bfilter_enum_fuel_type%5D=petrol&search%5Bfilter_enum_gearbox%5D=automatic&search%5Bfilter_float_year%3Ato%5D=2020&search%5Blat%5D=52.23614&search%5Blon%5D=21.00817&search%5Border%5D=relevance_web",
+                "year": "2019-2020"
+            }
+        ]
+    },
+    "report": {
+        "dir": "report",
+        "banned_urls": [],
+        "crashed_urls": [],
+        "fav_urls": [],
+        "dead_urls": [],
+        "relisted_urls": [
+            [
+            ],
+            [
+            ]
+        ],
+        "vins": {},
+        "notes": {}
+    }
+}

@@ -1,0 +1,652 @@
+
+body {
+	--font-size: 2.5rem;
+	--input-size: 4rem;
+}
+
+@media screen and (hover: hover) {
+	body {
+		--font-size: 1rem;
+		--input-size: var(--font-size);
+	}
+}
+
+body {
+	background-color: lightgray;
+	font-family: Inter, Arial, Helvetica, sans-serif;
+	font-size: var(--font-size);
+}
+
+input[type=checkbox],
+input[type=radio] {
+	font: inherit;
+	width: var(--input-size);
+	height: var(--input-size);
+	margin: 0;
+}
+
+#container {
+	display: grid;
+	gap: .6em .3em;
+	grid-template-columns: repeat(4, var(--input-size) 1fr);
+	margin: 1em;
+}
+
+@media screen and (hover: hover) {
+	#container {
+		grid-template-columns: repeat(auto-fit, var(--font-size) 4em);
+	}
+}
+
+#container input[type=checkbox],
+#container input[type=radio] {
+	--color: darkgreen;
+	appearance: none;
+	border: .1em solid #777;
+}
+
+#container input[type=radio] {
+	border-radius: 100%;
+	display: flex;
+}
+
+#container input[type=checkbox],
+#container select {
+	border-radius: 0;
+}
+
+#container input[type=checkbox]:checked::before,
+#container input[type=radio]:checked::before {
+	
+}
+
+#container input[type=checkbox]:checked::before {
+	color: var(--color);
+	content: "✓";
+	font-size: 200%;
+	line-height: var(--font-size);
+	position: relative;
+	top: -10%;
+}
+
+#container input[type=radio]:checked::before {
+	--size: 70%;
+	align-self: center;
+	background: var(--color);
+	border: .1em solid transparent;
+	border-radius: inherit;
+	box-sizing: border-box;
+	content: "";
+	display: block;
+	width: var(--size);
+	height: var(--size);
+	margin: 0 auto;
+}
+
+#container label {
+	line-height: var(--input-size);
+}
+
+[data-kind=filter] {
+	grid-row-start: 1;
+	grid-row-end: 2;
+}
+
+[data-kind=sort]{
+	grid-row-start: 2;
+	grid-row-end: 3;
+}
+
+#showEnded:checked ~ .auctions {
+	--display-ended: flex;
+}
+
+#showBanned:checked ~ .auctions {
+	--display-banned: flex;
+}
+
+#showEnded:checked ~ #showBanned:checked ~ .auctions {
+	--display-banned-ended: flex;
+}
+
+#showCrashed:checked ~ .auctions {
+	--display-crashed: flex;
+}
+
+select {
+	background: transparent;
+	border: .1em solid #777;
+	color: black;
+	font-size: var(--font-size);
+	outline: none;
+}
+
+#sort {
+	grid-column: 1/4;
+}
+
+#sort:has( > option[value="priceAsc"]:checked) ~ .auctions .auction {
+	--order: var(--price);
+}
+
+#sort:has( > option[value="priceDesc"]:checked) ~ .auctions .auction {
+	--order: calc(var(--price) * -1);
+}
+
+#sort:has( > option[value="yearAsc"]:checked) ~ .auctions .auction {
+	--order: var(--year);
+}
+
+#sort:has( > option[value="yearDesc"]:checked) ~ .auctions .auction {
+	--order: calc(var(--year) * -1);
+}
+
+#sort:has( > option[value="mileageAsc"]:checked) ~ .auctions .auction {
+	--order: var(--mileage);
+}
+
+#sort:has( > option[value="mileageDesc"]:checked) ~ .auctions .auction {
+	--order: calc(var(--mileage) * -1);
+}
+
+.auctions {
+	--display-ended: none;
+	--display-banned: none;
+	--display-crashed: none;
+	--display-banned-ended: none;
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+	grid-column-start: 1;
+	grid-column-end: -1;
+}
+
+.auction {
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	gap: .3em;
+	order: var(--order);
+	padding-bottom: .3em;
+}
+
+.auction.ended {
+	display: var(--display-ended);
+}
+
+.auction.banned {
+	display: var(--display-banned);
+}
+
+.auction.crashed {
+	display: var(--display-crashed);
+}
+
+.auction.banned.ended {
+	display: var(--display-banned-ended);
+}
+
+.auction.fav > a.otomotoAuctionLink:any-link,
+.auction.banned > a.otomotoAuctionLink:any-link,
+.auction.crashed > a.otomotoAuctionLink:any-link,
+.auction.new > a.otomotoAuctionLink:any-link {
+	text-decoration: none;
+}
+
+.auction.fav > a.otomotoAuctionLink:any-link::after,
+.auction.banned > a.otomotoAuctionLink:any-link::after,
+.auction.crashed > a.otomotoAuctionLink:any-link::after,
+.auction.new > a.otomotoAuctionLink:any-link::after {
+	aspect-ratio: 1/1;
+	background: linear-gradient(135deg, var(--color) 0%, var(--color) 50%, transparent 50%, transparent 100%);
+	box-sizing: border-box;
+	color: white;
+	display: block;
+	font-size: 200%;
+	line-height: 1.3em;
+	opacity: 80%;
+	padding-left: 0.1em;
+	width: 20%;
+}
+
+.auction.fav > a.otomotoAuctionLink:any-link::after {
+	--color: palegreen;
+	content: '★';
+}
+
+.auction.banned > a.otomotoAuctionLink:any-link::after {
+	--color: darkblue;
+	content: '∞';
+}
+
+.auction.crashed > a.otomotoAuctionLink:any-link::after {
+	--color: crimson;
+	content: '⦸︎';
+}
+
+.auction.new > a.otomotoAuctionLink:any-link::after {
+	--color: orange;
+	content: '!';
+}
+
+.auction.ended {
+	opacity: 0.5;
+}
+
+.auction.ended .otomotoAuctionLink {
+	filter: grayscale(1);
+}
+
+.auction.US > a.otomotoAuctionLink:any-link::before,
+.auction.CA > a.otomotoAuctionLink:any-link::before,
+.auction.PL > a.otomotoAuctionLink:any-link::before,
+.auction.DE > a.otomotoAuctionLink:any-link::before,
+.auction.IT > a.otomotoAuctionLink:any-link::before,
+.auction.FR > a.otomotoAuctionLink:any-link::before,
+.auction.SE > a.otomotoAuctionLink:any-link::before {
+	float: right;
+	font-size: 200%;
+	margin-right: .1em;
+	margin-top: -.1em;
+	position: relative;
+}
+
+.auction.US > a.otomotoAuctionLink:any-link::before {
+	content: '🇺🇸';
+}
+
+.auction.CA > a.otomotoAuctionLink:any-link::before {
+	content: '🇨🇦';
+}
+
+.auction.PL > a.otomotoAuctionLink:any-link::before {
+	content: '🇵🇱';
+}
+
+.auction.DE > a.otomotoAuctionLink:any-link::before {
+	content: '🇩🇪';
+}
+
+.auction.IT > a.otomotoAuctionLink:any-link::before {
+	content: '🇮🇹';
+}
+
+.auction.FR > a.otomotoAuctionLink:any-link::before {
+	content: '🇫🇷';
+}
+
+.auction.SE > a.otomotoAuctionLink:any-link::before {
+	content: '🇸🇪';
+}
+
+.auction > div {
+	margin: 0 .3em;
+}
+
+.otomotoAuctionLink {
+	background-image: var(--background);
+	background-position: center;
+	background-size: cover;
+	height: 10em;
+}
+
+.header {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 0 1em;
+}
+
+.auction > .age {
+	background: linear-gradient(90deg, darkseagreen 0, darkseagreen var(--age), #FFF8 var(--age), #FFF8 100%);
+	content: var(--first-auction);
+	flex-shrink: 0;
+	height: 1.4em;
+	line-height: 1.4em;
+	margin: -1.7em 0 0 0;
+	text-indent: .3em;
+	width: 100%;
+}
+
+.title {
+	--damage: crimson;
+	--warning: orange;
+	color: #777;
+	flex-grow: 1;
+	gap: .3em;
+}
+
+.title details[open] + .notes {
+	max-height: 10em;
+}
+
+.title summary {
+	display: flex;
+	gap: .3em;
+}
+
+.title summary::-webkit-details-marker {
+	display: none;
+}
+
+.title .notes {
+	color: azure;
+	display: flex;
+	flex-direction: column;
+	gap: .3em;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 400ms ease-in;
+}
+
+.title .notes .damage,
+.title .notes .warning,
+.title .notes .prices {
+	border-radius: .5em;
+	padding: .3em;
+	white-space: pre-wrap;
+	width: fit-content;
+}
+
+.title .notes .damage {
+	background-color: var(--damage);
+}
+
+.title .notes .warning {
+	background-color: var(--warning);
+}
+
+.title .notes .prices {
+	background-color: slateblue;
+	white-space: normal;
+}
+
+.car {
+	margin-bottom: -.1em;
+	padding-top: .1em;
+}
+
+#svg-car {
+	height: 1em;
+}
+
+#car {
+	fill: #999;
+}
+
+#car #front-wheel {
+	fill: var(--front-left-wheel, var(--front-right-wheel));
+}
+
+#car #rear-wheel {
+	fill: var(--rear-left-wheel, var(--rear-right-wheel));
+}
+
+#car #rear {
+	fill: var(--rear);
+}
+
+#car #side {
+	fill: var(--left, var(--right));
+}
+
+#car #front {
+	fill: var(--front);
+}
+
+#car #top {
+	fill: var(--roof);
+}
+
+#airbags {
+	fill: var(--warning);
+	opacity: var(--airbags-opacity, 0) !important;
+}
+
+.title summary .warning {
+	color: orange;
+	cursor: default;
+	display: none;
+	font-size: .9em;
+}
+
+.title summary .warning[title] {
+	display: flex;
+}
+
+.title summary .warning > span {
+	align-self: center;
+}
+
+.title .year {
+	color: #222;
+	margin-right: .2em;
+}
+
+.priceChange {
+	color: darkgreen;
+}
+
+.auction[data-price-drop] .priceChange {
+	color: crimson;
+}
+
+.auction[data-price-drop] .priceChange::before {
+	content: '⬇';
+	margin-right: .2em;
+}
+
+.auction[data-price-rise] .priceChange::before {
+	content: '⬆';
+	font-size: .9em;
+	margin-right: .2em;
+}
+
+.locationVin {
+	display: flex;
+	flex-direction: row;
+}
+
+.locationVin .location {
+	color: #999;
+	flex-grow: 1;
+}
+
+.locationVin a.vin:any-link {
+	color: #999;
+	text-decoration: none;
+}
+
+.details,
+.notes {
+	color: #222;
+	display: flex;
+	flex-direction: row;
+	font-size: 1.1em;
+}
+
+.details > div {
+	flex-grow: 1;
+}
+
+.details > div:last-child,
+.price {
+	text-align: right;
+}
+
+.price {
+	display: flex;
+	justify-content: flex-end;
+}
+
+
+.price .priceTargeting[data-high-price] {
+	--price-targeting-color: crimson;
+}
+
+.price .priceTargeting {
+	--price-targeting-color: darkgreen;
+	align-self: center;
+	aspect-ratio: 2/1;
+  	background: conic-gradient( from 270deg at 50% 100%, var(--price-targeting-color) 0deg var(--price-deg), lightgray var(--price-deg) 75deg);
+  	border-radius: 1.2em 1.2em 0 0;
+  	margin: 0 .2em .2cap 0;
+  	height: 1.2cap;
+}
+
+.snapshot {
+	color: #777;
+	display: grid;
+	font-size: var(--snapshot-font-size);
+	grid-template-columns: 50% 50%;
+}
+
+.snapshot a:any-link {
+	color: inherit;
+	text-decoration: none;
+}
+
+summary.snapshot::-webkit-details-marker {
+	display: none;
+}
+
+.snapshots > div.snapshot {
+	margin-top: var(--snapshot-gap);
+}
+
+.history {
+	--snapshot-gap: .3em;
+	--snapshot-font-size: .9em;
+	--snapshots-count: 1;
+	--snapshot-height: var(--snapshot-font-size) + var(--snapshot-gap);
+	--snapshots-height: calc(var(--snapshots-count) * (var(--snapshot-height) + var(--snapshot-gap)));
+}
+
+.history details {
+	margin-bottom: .2em;
+}
+
+.history details::after {
+	clip-path: inset(50% 0 0 0);
+	color: #999;
+	content: '▿';
+	display: block;
+	font-size: 1.3em;
+	line-height: .7em;
+	overflow: hidden;
+	text-align: center;
+	margin-bottom: -.8em;
+	pointer-events: none;
+	position: relative;
+	top: -.8em;
+}
+
+.history details[open]::after {
+	rotate: 180deg;
+	top: -.6em;
+}
+
+.history details + .snapshots {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 400ms ease-in;
+}
+
+.history details[open] + .snapshots {
+	max-height: var(--snapshots-height);
+}
+
+@media screen and (hover: hover) {
+	.auctions {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
+	}
+
+	.auction {
+		flex-basis: 0;
+		flex-grow: 1;
+		min-width: max(20%, 20em);
+	}
+}
+
+/* chart */
+svg.priceChart {
+	--font-scale: 2.5;
+}
+
+@media screen and (hover: hover) {
+	svg.priceChart {
+		--font-scale: 1;
+	}
+}
+
+.auction svg.priceChart {
+	--price-main-color: darkgreen;
+	--price-bg-color: darkseagreen;
+}
+
+.auction[data-price-drop] svg.priceChart {
+	--price-main-color: crimson;
+	--price-bg-color: lightcoral;
+}
+
+svg.priceChart g.background line.axisDate {
+	stroke: #222;
+	stroke-width: .5;
+}
+
+svg.priceChart g.price rect {
+	fill: var(--price-main-color);
+}
+
+svg.priceChart g.price text {
+	fill: linen;
+	font-size: calc(1em / var(--font-scale) * 0.5);
+}
+
+svg.priceChart g.price polygon {
+	fill: white;
+	opacity: 0;
+	transition: opacity 200ms ease-in;
+}
+
+svg.priceChart g.price polyline {
+	fill: none;
+	stroke: var(--price-main-color);
+	stroke-linecap: round;
+	stroke-width: 1;
+}
+
+svg.priceChart g.price g.priceInfo {
+	display: none;
+	pointer-events: none;
+}
+
+@media (hover: hover) {
+	svg.priceChart g.price polygon:hover {
+		opacity: .5;
+	}
+
+	svg.priceChart g.price polygon:hover ~ g.priceInfo {
+		display: unset;
+	}
+}
+
+@media (pointer: coarse) {
+	svg.priceChart g.price polygon:focus {
+		opacity: .5;
+	}
+
+	svg.priceChart g.price polygon:focus ~ g.priceInfo {
+		display: unset;
+	}
+}
+
+svg.priceChart g.dateInfo line.date {
+	stroke: #222;
+	stroke-width: .5;
+}
+
+svg.priceChart g.dateInfo text.date {
+	font-size: calc(1em / var(--font-scale) * 0.3);
+}

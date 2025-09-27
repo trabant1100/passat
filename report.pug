@@ -1,0 +1,116 @@
+mixin snapshotDetail(snapshot)
+	.lastDate
+		a(href=`../listing/${snapshot.snapshotDate}/${snapshot.id}.html`)
+			=new Intl.DateTimeFormat("pl-PL", { day: 'numeric', month: 'long' }).format(fn.parseDate(snapshot.snapshotDate))
+	.price= (new Intl.NumberFormat('pl-PL').format(snapshot.price)) + ' ' + (snapshot.currency == 'EUR' ? '€' : 'zł')
+
+mixin priceTargeting(snapshot)
+	if snapshot.priceTargeting
+		- var min = Number.parseInt(snapshot.priceTargeting.min)
+		- var max = Number.parseInt(snapshot.priceTargeting.max)
+		- var val = Number.parseInt(snapshot.priceTargeting.price)
+		- var pricePercent = fn.clamp(Math.round((val - min) / (max - min) * 100), 20, 100)
+		- var pricePercentExact = Math.round((val - min) / (max - min) * 100)
+		- var priceDeg = Math.round((pricePercent * 180) / 100)
+		.priceTargeting(title=`${pricePercentExact}%`,
+			data-high-price=pricePercent > 50
+			style=`--price-deg: ${priceDeg}deg`)
+
+doctype html
+html(lang="pl")
+	head
+		meta(charset='utf-8')
+		title= 'Report'
+		link(rel='stylesheet', type='text/css', href=`../report.css?${Math.random()}`)
+	body
+		include chart
+		div#container
+			input(type='checkbox', data-kind='filter', id='showEnded')
+			label(for='showEnded', data-kind='filter') Ended
+			input(type='checkbox', data-kind='filter', id='showBanned')
+			label(for='showBanned', data-kind='filter') Banned
+			input(type='checkbox', data-kind='filter', id='showCrashed')
+			label(for='showCrashed', data-kind='filter') Crashed
+			
+			select(data-kind='sort', id='sort')
+				option(value='priceAsc') Price ↑
+				option(value='priceDesc') Price ↓
+				option(value='yearAsc') Year ↑
+				option(value='yearDesc') Year ↓
+				option(value='mileageAsc') Mileage ↑
+				option(value='mileageDesc') Mileage ↓
+
+			div(class='auctions')
+				each auction, auctionId in report
+					- var firstSnapshot = auction.snapshots[0]
+					- var lastSnapshot = auction.snapshots.at(-1)
+					- var priceChange = Math.round((lastSnapshot.price - firstSnapshot.price) / firstSnapshot.price * 100)
+					- var banned = auction.banned ? 'banned' : ''
+					- var crashed = auction.crashed ? 'crashed' : ''
+					- var fav = auction.fav ? 'fav' : ''
+					- var dead = auction.dead ? 'dead' : ''
+					- var ended = auction.ended ? 'ended' : ''
+					- var new_ = auction.new ? 'new' : ''
+					- var country = lastSnapshot.country ?? auction.notes?.country;
+					- var className = ['auction', banned, crashed, fav, dead, ended, new_, country].join(' ')
+					- var year = `--year: ${auction.year}`
+					- var price = `--price: ${fn.finalPriceInPln(lastSnapshot.price, lastSnapshot.currency)}`
+					- var mileage = `--mileage: ${Number.parseInt(lastSnapshot.mileage.replace(' ', ''))}`
+					- var style = [year, price, mileage].join('; ')
+					- var age = Math.floor(fn.age(fn.parseDate(firstSnapshot.snapshotDate)) / (356/2) * 100);
+					- var firstAuction = fn.parseDate(firstSnapshot.snapshotDate).toRelative({ locale: 'pl-PL'})
+					- var currency = lastSnapshot.currency == 'EUR' ? '€' : 'zł'
+					- var finalPrice = lastSnapshot.currency == 'EUR' ? ` ≈ ${new Intl.NumberFormat('pl-PL').format(fn.finalPriceInPln(lastSnapshot.price, lastSnapshot.currency))} zł` : ''
+					div(class=className, style=style, data-price-drop=priceChange < 0, data-price-rise=priceChange > 0)
+						- var snapshots = auction.snapshots.toReversed()
+						a(class='otomotoAuctionLink', href=lastSnapshot.url, target='_blank', style="--background: url('" + lastSnapshot.imgUrls[0] + "')" )
+						.age(style=`--first-auction: '${firstAuction}'; --age: ${age}%`)
+							| #{firstAuction}
+						.header
+							.title
+								- var damages = auction?.notes?.damage?.map(d => `--${d.replaceAll(' ', '-')}: var(--damage)`).join('; ').replace('--airbags: var(--damage)', '--airbags: var(--airbags-damage); --airbags-opacity: 1')
+								- var damagesDesc = auction?.notes?.damage?.join(', ')
+								- var prices = auction?.notes?.price
+								details 
+									summary
+										div(class='car', style=damages, title=damagesDesc)
+											include car.svg
+										- var warnings = auction?.notes?.warning?.join("\n")
+										div(class='warning', title=warnings): span='⚠️'
+										div.year= auction.year
+								.notes
+									if damagesDesc
+										.damage= damagesDesc
+									if warnings
+										.warning= warnings
+									if prices
+										.prices
+											each price, currency in prices
+												- var priceValue = price.value ? new Intl.NumberFormat('pl-PL').format(price.value) : '?'
+												div= `${priceValue}${currency == 'USD' ? '$' : 'zł'} ${price.date || ''} `
+							.priceChange
+								| #{priceChange}%
+						.locationVin
+							.location= lastSnapshot.location
+							a.vin(href=`https://www.google.com/search?q=${auction.vin}`, target='_blank')
+								| #{(auction.vin || '').toUpperCase()}
+						.details
+							.mileage= lastSnapshot.mileage
+							.price 
+								+priceTargeting(lastSnapshot) 
+								div= (new Intl.NumberFormat('pl-PL').format(lastSnapshot.price)) + ` ${currency}` + finalPrice
+						.notes
+							div
+
+						.history(style=`--snapshots-count: ${snapshots.length-1};`)
+							- var chronos = snapshots.toReversed().map(s => ({ date: s.snapshotDate, price: s.price, currency: s.currency }))
+							+chart(auctionId, scale, chronos, fn)
+							details
+								summary.snapshot
+									+ snapshotDetail(snapshots[0])
+							.snapshots
+								each snapshot, index in snapshots.splice(1)
+									.snapshot
+										+ snapshotDetail(snapshot)
+								
+
